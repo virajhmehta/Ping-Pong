@@ -1,0 +1,128 @@
+import simplegui
+import random
+
+width=600
+height=400
+ball_radius=10
+pad_width=10
+pad_height=80
+s1=s2=0
+p1_vel=0
+p2_vel=0
+p1_pos=height/2
+p2_pos=height/2
+half_pad_width=pad_width/2
+half_pad_height=pad_height/2
+LEFT=False
+RIGHT=True
+ball_pos=[width/2,height/2]
+ball_vel=[1,1]
+music=simplegui.load_sound("D:/my python programs/codeskulptor programs/objects for programs/tune.mp3")
+
+def new_game():
+    global s1,s2,p1_pos,p2_pos,p1_vel,p2_vel
+    s1=s2=0
+    p1_vel=0
+    p2_vel=0
+    p1_pos=height/2
+    p2_pos=height/2
+    r=random.randrange(2)
+    if(r==0):
+        spawn(LEFT)
+    else:
+        spawn(RIGHT)
+        
+def spawn(direction):
+    global ball_pos,ball_vel
+    ball_pos=[width/2,height/2]
+    ball_vel=[1,1]
+    
+    if(direction==LEFT):
+        ball_vel=[-1,-1]
+    elif(direction==RIGHT):
+        ball_vel=[1,-1]
+        
+def kd(key):
+    global p1_vel,p2_vel
+    if key==simplegui.KEY_MAP["w"]:
+        p1_vel=-3
+    if key==simplegui.KEY_MAP["s"]:
+        p1_vel=3
+    if key==simplegui.KEY_MAP["up"]:
+        p2_vel=-3
+    if key==simplegui.KEY_MAP["down"]:
+        p2_vel=3
+        
+        
+def ku(key):
+    global p1_vel,p2_vel
+    if key==simplegui.KEY_MAP["w"]:
+        p1_vel=0
+    if key==simplegui.KEY_MAP["s"]:
+        p1_vel=0
+    if key==simplegui.KEY_MAP["up"]:
+        p2_vel=0
+    if key==simplegui.KEY_MAP["down"]:
+        p2_vel=0
+        
+def draw(canvas):
+    global s1,s2,ball_pos,ball_vel,p1_vel,p2_vel,width,height,p1_pos,p2_pos
+    
+    #music
+    music.play()
+    
+    #lines
+    canvas.draw_line([width/2,0],[width/2,height],4,"White")
+    canvas.draw_line([pad_width,0],[pad_width,height],1,"White")
+    canvas.draw_line([width-pad_width,0],[width-pad_width,height],1,"White")
+    
+    #paddles
+    canvas.draw_line([pad_width-5,p1_pos-40],[pad_width-5,p1_pos+40],10,"Red")
+    canvas.draw_line([width-pad_width+5,p2_pos-40],[width-pad_width+5,p2_pos+40],10,"Lime")
+    
+    #scores
+    canvas.draw_text("Player1: "+str(s1),[110,50],22,"Blue")
+    canvas.draw_text("Player2: "+str(s2),[400,50],22,"Blue")
+    
+    #paddle moving
+    p1_pos+=p1_vel
+    p2_pos+=p2_vel
+    
+    if(p1_pos<40 or p1_pos>height-40):
+        p1_vel=0
+    if(p2_pos<40 or p2_pos>height-40):
+        p2_vel=0
+    
+    #ball
+    canvas.draw_circle(ball_pos,ball_radius,2,"White","Orange")
+    
+    #ball moving
+    ball_pos[0]=ball_pos[0]+ball_vel[0]
+    ball_pos[1]=ball_pos[1]+ball_vel[1]
+    
+    #if ball touches on the border of the canvas
+    if(ball_pos[0]<=pad_width+ball_radius or ball_pos[0]>=width-pad_width-ball_radius):
+        ball_vel[0]=-ball_vel[0]
+        
+    if(ball_pos[1]<=ball_radius or ball_pos[1]>=height-ball_radius):
+        ball_vel[1]=-ball_vel[1]
+        
+    #if ball toches on the either sides of players and scores updates
+    if((ball_pos[1]<=p1_pos-40)or(ball_pos[1]>=p1_pos+40))and(ball_pos[0]<=ball_radius+pad_width):
+        s2+=1
+        spawn(RIGHT)
+    if((ball_pos[1]<=p2_pos-40)or(ball_pos[1]>=p2_pos+40))and(ball_pos[0]>=width-(ball_radius+pad_width)):
+        s1+=1
+        spawn(LEFT)
+           
+frame=simplegui.create_frame("Ping Pong",width,height)
+frame.set_draw_handler(draw)
+frame.set_keydown_handler(kd)
+frame.set_keyup_handler(ku)
+frame.add_button("Restart",new_game,100)
+frame.set_canvas_background("Teal")
+
+frame.start()
+                
+
+    
